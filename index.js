@@ -12,8 +12,12 @@ import puppeteer from 'puppeteer';
 
     await page.goto('https://anycart.com/');
 
-    await page.waitForTimeout(5000);
-
+    // await page.waitForTimeout(5000);
+    // page.waitForSelector('[data-testid="modal-close"]', {
+    //     visible: true
+    // })
+    await page.waitForSelector('[data-testid="modal-close"]')
+    // .then(() => console.log('got it'));
     await page.click('[data-testid="modal-close"]')
 
 
