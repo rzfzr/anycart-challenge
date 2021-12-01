@@ -53,18 +53,14 @@ async function scrollBottom(page) {
     await safeClick(page, '[data-testid="address-list-item"]')
     await safeClick(page, '[data-testid="select-shop-partner"]')
 
-    await page.evaluate(() => {
-        window.scrollTo(0, window.document.body.scrollHeight)
-    });
 
     await scrollBottom(page)
 
-    const children = await page.$$('[id="gallery-13"]');
-
-    console.log("Result:", children);
-    // await safeClick(page, '[id="gallery-13"]')
-
-    // id="gallery-13"
-
-    // qty-btn __add __initial
+    const recipes = await page.$$('li.app-craft-item-interactive');
+    // id="gallery-xx" is not static
+    // app-craft-item-interactive is unique to recipes
+    recipes.forEach(async (recipe) => {
+        const btn = await recipe.$('[class="qty-btn __add __initial"]')
+        await btn.click()
+    });
 })();
