@@ -1,5 +1,11 @@
 import puppeteer from 'puppeteer';
 
+async function safeClick(page, selector) {
+    await page.waitForSelector(selector) //todo: handle timeout
+    await page.click(selector)
+    return
+}
+
 (async () => {
     const browser = await puppeteer.launch({
         headless: false
@@ -12,14 +18,11 @@ import puppeteer from 'puppeteer';
 
     await page.goto('https://anycart.com/');
 
+    await safeClick(page, '[data-testid="modal-close"]')
     // await page.waitForTimeout(5000);
     // page.waitForSelector('[data-testid="modal-close"]', {
     //     visible: true
     // })
-    await page.waitForSelector('[data-testid="modal-close"]')
-    // .then(() => console.log('got it'));
-    await page.click('[data-testid="modal-close"]')
-
 
     // const el = await page.$('document.querySelector("body > div.home-template.app-has-sidebar.app--has-header.app-has-sidebar--hamburger-menu-is-closed.app-has-sidebar--is-open > section > div > div > div.app-promo-onboarding-modal.generic-modal > div > span > div > div.right-section > div > button")')
     // await page.click('document.querySelector("body > div.home-template.app-has-sidebar.app--has-header.app-has-sidebar--hamburger-menu-is-closed.app-has-sidebar--is-open > section > div > div > div.app-promo-onboarding-modal.generic-modal > div > span > div > div.right-section > div > button")')
