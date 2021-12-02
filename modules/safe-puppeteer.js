@@ -70,8 +70,12 @@ export async function goto(page, url, isShooting) {
     await shoot(page, isShooting)
 }
 export async function wait(page, selector, timeout, isShooting) {
-    await page.waitForSelector(selector, {
-        timeout: timeout
-    })
-    await shoot(page, isShooting)
+    try {
+        await page.waitForSelector(selector, {
+            timeout: timeout
+        })
+        await shoot(page, isShooting)
+    } catch (error) {
+        console.log("Protocol Error")
+    }
 }

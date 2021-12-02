@@ -3,10 +3,10 @@
 npm install
 node anybot -h
 ```
-Developed under node 14.15.4 on W10, tested 
+Developed under node 14.15.4 on W10, tested on a debian-based distro running node 16.13.1
 # Design Decisions
 
-I made many assumptions, whenever made false would require changes in the implementation, such as assuming that selecting elements by text would be an issue due to localization, and that time based delays would be inconvenient.
+I made many assumptions, whenever made false would require changes in the implementation, such as assuming that selecting elements by text would be an issue due to localization, and that time based delays would be inconvenient. I made delays long, sacrificing speed for stability.
 
 I have used selenium in a single project in the past, a quick google search told me that puppeteer should be better for the wanted effect.
 ## Routines
@@ -55,7 +55,8 @@ I haven't invested a lot of time here, but I have some suggestions:
 A startup benchmark could judge connection speed, giving a value to be used in the delays, not only puppeteer's slomo setting, but waiting random +-x% between each action, in order to bypass bot-detection in other sites.
 There should be a failsafe for carts with less than $30, either by returning and adding more items, or by reading the value and not going to checkout in the first place.
 There should be a failsafe for carts that do not require any 'staple' items.
-Headful mode gives out an protocol error, does not affect anything but could be solved, might be a puppeteer's version issue.
+Headful mode gives out an protocol error on the last waitForElement, does not affect anything but could be solved, might be a puppeteer's version issue, it non-blocking on windows.
+For some reasun headful sometimes pull user focus to status bar
 ## safe-puppeteer
 Most of these functions are not actually 'safe', each of them should have error handling, capable of either ignoring and going to the next step, or retrying the last action
 
@@ -67,3 +68,5 @@ shoot() should be able to receive the selector for the clicked or typed element,
 scroll() should receive a selector, scrolling till it is visible, alongside with scroll direction.
 ## commander 
 Flags should not be exclusive,being able to choose headless and logging for example
+## extras
+There could be a progress bar, each step in a routine could have a 'description' field, so that we could log it instead of the selectors.
