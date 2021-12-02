@@ -4,6 +4,9 @@ import puppeteer from 'puppeteer';
 async function safeClick(page, selector) {
     console.log('safeClick', selector);
     await page.waitForSelector(selector) //todo: handle timeout instead of try catch
+    // await page.waitForSelector(selector, {
+    //     visible: true
+    // })
     console.log('Found')
     await page.click(selector)
     console.log('Clicked', selector)
@@ -27,7 +30,7 @@ async function safeType(page, selector, message) {
     return
 }
 
-async function scrollBottom(page) {
+async function scrollBottom(page) { //todo: should scroll till selector is visible
     await page.evaluate(async () => {
         let scrollPosition = 0
         let documentHeight = document.body.scrollHeight
@@ -35,7 +38,7 @@ async function scrollBottom(page) {
         while (documentHeight > scrollPosition) {
             window.scrollBy(0, documentHeight)
             await new Promise(resolve => {
-                setTimeout(resolve, 1000)
+                setTimeout(resolve, 1200)
             })
             scrollPosition = documentHeight
             documentHeight = document.body.scrollHeight
@@ -43,15 +46,21 @@ async function scrollBottom(page) {
     })
 }
 
-(async () => {
+
+runRoutine()
+
+async function runRoutine() {
     const browser = await puppeteer.launch({
-        headless: false
+        headless: false, // headless mode give some errors but finishes without issues (Protocol error (Page.createIsolatedWorld): No frame for given id found)
+        browserContext: "default",
+        slowMo: 200,
     });
     const page = await browser.newPage();
     await page.setViewport({
-        width: 1280,
-        height: 800
+        width: 1600,
+        height: 900
     })
+    console.log('Routine Started')
 
     await page.goto('https://anycart.com/');
     await safeClick(page, '[data-testid="modal-close"]')
@@ -65,18 +74,24 @@ async function scrollBottom(page) {
     //todo: add failsafe when less than $30
     await safeClickMultiple(page, 'li.app-craft-item-interactive .qty-btn.__add');
 
-    await page.waitForTimeout(1000);
     await safeClick(page, '[class="top-nav-item cart-item __has-items"]')
 
-
-    await safeClick(page, 'button.ch-o-btn')
+    // await page.waitForTimeout(1000);
+    await safeClick(page, '.cart-summary-top button')
 
 
     // todo: check if 'staples' modal actually opens
     // todo: find a better indentifier
-    await safeClick(page, '[class="anycart-btn btn-med btn-branding-color btn-font-normal"]')
+    await safeClick(page, '.modal-sticky-bottom-bar button')
     // class="place-order-button anycart-btn btn-branding-color disabled btn-font-big btn-med"
     //class="payment-button-container place-order-button anycart-btn btn-branding-color btn-font-big-bold btn-med"
+    //summary-row total 
 
+    await page.waitForSelector('.payment-button-container', {
+        timeout: 120000
+    })
 
-})();
+    console.log('Routine Finished')
+    await browser.close();
+
+}
