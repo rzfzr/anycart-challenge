@@ -53,7 +53,7 @@
             "data": [
                 {
                     "selector": ".payment-button-container",
-                    "timeout": 120000
+                    "timeout": 200000
                 }
             ]
         }

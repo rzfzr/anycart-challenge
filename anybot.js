@@ -24,11 +24,11 @@ program
     .action(() => {
         bot.run(routine0, false)
     })
-// program
-//     .command('log')
-//     .alias('l')
-//     .description('Execute default routine, but picture logging into /screenshots/')
-//     .action(() => {
-//         bot.run(routine0, false)
-//     })
+program
+    .command('shoot')
+    .alias('s')
+    .description('Execute default routine, but picture logging into /screenshots/')
+    .action(() => {
+        bot.run(routine0, false, true)
+    })
 program.parse(process.argv)

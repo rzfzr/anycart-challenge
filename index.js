@@ -7,7 +7,7 @@ import {
     wait,
 } from "./modules/safe-puppeteer.js"
 
-export async function run(routine, headless = true) {
+export async function run(routine, headless = true, isShooting = false) {
     console.log('Routine Started')
     const {
         browser,
@@ -18,17 +18,17 @@ export async function run(routine, headless = true) {
         switch (step.action) {
             case 'goto':
                 for await (const element of step.data) {
-                    await goto(page, element)
+                    await goto(page, element, isShooting)
                 }
                 break;
             case 'click':
                 for await (const element of step.data) {
-                    await click(page, element)
+                    await click(page, element, false, isShooting)
                 }
                 break;
             case 'type':
                 for await (const element of step.data) {
-                    await type(page, element.selector, element.text)
+                    await type(page, element.selector, element.text, isShooting)
                 }
                 break;
             case 'scroll':
@@ -36,12 +36,12 @@ export async function run(routine, headless = true) {
                 break;
             case 'clickAll':
                 for await (const element of step.data) {
-                    await click(page, element, true)
+                    await click(page, element, true, isShooting)
                 }
                 break;
             case 'wait':
                 for await (const element of step.data) {
-                    await wait(page, element.selector, element.timeout)
+                    await wait(page, element.selector, element.timeout, isShooting)
                 }
                 break;
             default:
