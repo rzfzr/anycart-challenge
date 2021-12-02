@@ -1,33 +1,34 @@
 import puppeteer from 'puppeteer';
 
-export async function getNewPage() {
+export async function getBrowserPage() {
+    // @logger //gave up
     const browser = await puppeteer.launch({
         headless: false, // headless mode give some errors but finishes without issues (Protocol error (Page.createIsolatedWorld): No frame for given id found)
         browserContext: "default",
         slowMo: 200,
     });
-    const page = await browser.newPage(); //these could have been parameterized
+    const page = await browser.newPage();
     await page.setViewport({
         width: 1600,
         height: 900
     })
-    return page
+    return {
+        browser,
+        page
+    }
 }
 
 //todo: move these safeFunctions to decorators, same with logging and delay functions
-export async function click(page, selector) {
+export async function click(page, selector, multiple = false) {
+    if (multiple) {
+        await page.$$eval(selector, (links) => {
+            links.forEach(link => link.click())
+        })
+    }
     await page.waitForSelector(selector) //todo: handle timeout instead of try catch
     await page.click(selector)
-    return
 }
-// cant reuse safeClick because of context change
-export async function clickAll(page, selector) { //todo: actually be 'safe'
-    console.log('safeClickMultiple', selector);
-    await page.$$eval(selector, (links) => {
-        links.forEach(link => link.click())
-    })
-    console.log('Clicked Multiple')
-}
+
 export async function type(page, selector, message) {
     try {
         await page.type(selector, message)

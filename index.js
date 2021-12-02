@@ -1,23 +1,35 @@
 import fs from "fs"
 import {
-    getNewPage,
+    getBrowserPage,
     click,
-    clickAll,
     type,
     scroll,
     goto,
     wait,
 } from "./modules/safe-puppeteer.js"
 
+//start here
+run(JSON.parse(fs.readFileSync('./routines/0.json')))
+
+async function log(fun) {
+    console.log('Executing ', fun.name)
+    // fun()
+}
+
+
+
 async function run(routine) {
     console.log('Routine Started')
-    const page = getNewPage
+    const {
+        browser,
+        page
+    } = await getBrowserPage()
     for await (const step of routine.steps) {
         console.log('doing ', step.action);
         switch (step.action) {
             case 'goto':
                 for await (const element of step.data) {
-                    await goto(page, element)
+                    await log(goto(page, element))
                 }
                 break;
             case 'click':
@@ -35,7 +47,7 @@ async function run(routine) {
                 break;
             case 'clickAll':
                 for await (const element of step.data) {
-                    await clickAll(page, element)
+                    await click(page, element, true)
                 }
                 break;
             case 'wait':
@@ -50,5 +62,3 @@ async function run(routine) {
     console.log('Routine Finished')
     await browser.close();
 }
-
-run(JSON.parse(fs.readFileSync('./routines/0.json')))
