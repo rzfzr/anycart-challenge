@@ -1,0 +1,61 @@
+{
+    "name": "GetAllRecipes",
+    "creator": "rzfzr",
+    "steps": [
+        {
+            "action": "goto",
+            "data": [
+                "https://anycart.com/"
+            ]
+        },
+        {
+            "action": "click",
+            "data": [
+                "[data-testid=\"modal-close\"]",
+                "[href=\"/select-shop\"]"
+            ]
+        },
+        {
+            "action": "type",
+            "data": [
+                {
+                    "selector": "[data-testid=\"address-l1-autocomplete\"]",
+                    "text": "94306"
+                }
+            ]
+        },
+        {
+            "action": "click",
+            "data": [
+                "[data-testid=\"address-list-item\"]",
+                "[data-testid=\"select-shop-partner\"]"
+            ]
+        },
+        {
+            "action": "scroll"
+        },
+        {
+            "action": "clickAll",
+            "data": [
+                "li.app-craft-item-interactive .qty-btn.__add"
+            ]
+        },
+        {
+            "action": "click",
+            "data": [
+                "[class=\"top-nav-item cart-item __has-items\"]",
+                ".cart-summary-top button",
+                ".modal-sticky-bottom-bar button"
+            ]
+        },
+        {
+            "action": "wait",
+            "data": [
+                {
+                    "selector": ".payment-button-container",
+                    "timeout": 120000
+                }
+            ]
+        }
+    ]
+}

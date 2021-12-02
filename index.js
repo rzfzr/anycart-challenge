@@ -1,5 +1,5 @@
 import puppeteer from 'puppeteer';
-
+import fs from "fs"
 //todo: move these safeFunctions to decorators, same with logging and delay functions
 async function click(page, selector) {
     console.log('safeClick', selector);
@@ -53,48 +53,8 @@ async function wait(page, selector, timeout) {
         timeout: timeout
     })
 }
-const routine = {
-    name: "GetAllRecipes",
-    creator: "rzfzr",
-    steps: [{
-            action: 'goto',
-            data: ['https://anycart.com/']
-        }, {
-            action: 'click',
-            data: ['[data-testid="modal-close"]', '[href="/select-shop"]']
-            //could have used /select-shop path and skipped a few steps
-        }, {
-            action: 'type',
-            data: [{
-                selector: '[data-testid="address-l1-autocomplete"]',
-                text: '94306'
-            }]
-        },
-        {
-            action: 'click',
-            data: ['[data-testid="address-list-item"]', '[data-testid="select-shop-partner"]']
-        }, {
-            action: 'scroll'
-        }, {
-            action: 'clickAll',
-            data: ['li.app-craft-item-interactive .qty-btn.__add']
-        }, {
-            action: 'click',
-            data: ['[class="top-nav-item cart-item __has-items"]', '.cart-summary-top button', '.modal-sticky-bottom-bar button']
-            // todo: check if 'staples' modal actually opens
-        },
-        {
-            action: 'wait',
-            data: [{
-                selector: '.payment-button-container',
-                timeout: 120000
-            }]
-        }
-    ]
-}
 
-
-run(routine)
+run(JSON.parse(fs.readFileSync('./routines/0.json')))
 
 async function run(routine) {
     console.log('Routine Started')
@@ -111,7 +71,7 @@ async function run(routine) {
     })
 
 
-    for await (const step of routine) {
+    for await (const step of routine.steps) {
         console.log('doing ', step.action);
         switch (step.action) {
             case 'goto':
