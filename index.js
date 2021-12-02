@@ -1,7 +1,7 @@
 import puppeteer from 'puppeteer';
 
 //todo: move these safeFunctions to decorators, same with logging and delay functions
-async function safeClick(page, selector) {
+async function click(page, selector) {
     console.log('safeClick', selector);
     await page.waitForSelector(selector) //todo: handle timeout instead of try catch
     // await page.waitForSelector(selector, {
@@ -13,14 +13,14 @@ async function safeClick(page, selector) {
     return
 }
 // cant reuse safeClick because of context change
-async function safeClickMultiple(page, selector) { //todo: actually be 'safe'
+async function clickAll(page, selector) { //todo: actually be 'safe'
     console.log('safeClickMultiple', selector);
     await page.$$eval(selector, (links) => {
         links.forEach(link => link.click())
     })
     console.log('Clicked Multiple')
 }
-async function safeType(page, selector, message) {
+async function type(page, selector, message) {
     try {
         await page.type(selector, message)
     } catch (error) {
@@ -30,7 +30,7 @@ async function safeType(page, selector, message) {
     return
 }
 
-async function scrollBottom(page) { //todo: should scroll till selector is visible
+async function scroll(page) { //todo: should scroll till selector is visible
     await page.evaluate(async () => {
         let scrollPosition = 0
         let documentHeight = document.body.scrollHeight
@@ -45,11 +45,60 @@ async function scrollBottom(page) { //todo: should scroll till selector is visib
         }
     })
 }
+async function goto(page, url) {
+    await page.goto(url);
+}
+async function wait(page, selector, timeout) {
+    await page.waitForSelector(selector, {
+        timeout: timeout
+    })
+}
+const routine = {
+    name: "GetAllRecipes",
+    creator: "rzfzr",
+    steps: [{
+            action: 'goto',
+            data: ['https://anycart.com/']
+        }, {
+            action: 'click',
+            data: ['[data-testid="modal-close"]', '[href="/select-shop"]']
+            //could have used /select-shop path and skipped a few steps
+        }, {
+            action: 'type',
+            data: [{
+                selector: '[data-testid="address-l1-autocomplete"]',
+                text: '94306'
+            }]
+        },
+        {
+            action: 'click',
+            data: ['[data-testid="address-list-item"]', '[data-testid="select-shop-partner"]']
+        }, {
+            action: 'scroll'
+        }, {
+            action: 'clickAll',
+            data: ['li.app-craft-item-interactive .qty-btn.__add']
+        }, {
+            action: 'click',
+            data: ['[class="top-nav-item cart-item __has-items"]', '.cart-summary-top button', '.modal-sticky-bottom-bar button']
+            // todo: check if 'staples' modal actually opens
+        },
+        {
+            action: 'wait',
+            data: [{
+                selector: '.payment-button-container',
+                timeout: 120000
+            }]
+        }
+    ]
+}
 
 
-runRoutine()
+run(routine)
 
-async function runRoutine() {
+async function run(routine) {
+    console.log('Routine Started')
+
     const browser = await puppeteer.launch({
         headless: false, // headless mode give some errors but finishes without issues (Protocol error (Page.createIsolatedWorld): No frame for given id found)
         browserContext: "default",
@@ -60,38 +109,49 @@ async function runRoutine() {
         width: 1600,
         height: 900
     })
-    console.log('Routine Started')
-
-    await page.goto('https://anycart.com/');
-    await safeClick(page, '[data-testid="modal-close"]')
-    await safeClick(page, '[href="/select-shop"]') //could have used /select-shop path and skipped the steps above
-    await safeType(page, '[data-testid="address-l1-autocomplete"]', '94306')
-    await safeClick(page, '[data-testid="address-list-item"]')
-    await safeClick(page, '[data-testid="select-shop-partner"]')
 
 
-    await scrollBottom(page)
-    //todo: add failsafe when less than $30
-    await safeClickMultiple(page, 'li.app-craft-item-interactive .qty-btn.__add');
+    for await (const step of routine) {
+        console.log('doing ', step.action);
+        switch (step.action) {
+            case 'goto':
+                for await (const element of step.data) {
+                    await goto(page, element)
+                }
+                break;
+            case 'click':
+                for await (const element of step.data) {
+                    await click(page, element)
+                }
+                break;
+            case 'type':
+                for await (const element of step.data) {
+                    await type(page, element.selector, element.text)
+                }
+                break;
+            case 'scroll':
+                await scroll(page)
+                break;
+            case 'clickAll':
+                for await (const element of step.data) {
+                    await clickAll(page, element)
+                }
+                break;
+            case 'wait':
+                for await (const element of step.data) {
+                    await wait(page, element.selector, element.timeout)
+                }
+                break;
+            default:
+                console.log(`Unknown action`);
+        }
 
-    await safeClick(page, '[class="top-nav-item cart-item __has-items"]')
 
-    // await page.waitForTimeout(1000);
-    await safeClick(page, '.cart-summary-top button')
+    }
 
-
-    // todo: check if 'staples' modal actually opens
-    // todo: find a better indentifier
-    await safeClick(page, '.modal-sticky-bottom-bar button')
-    // class="place-order-button anycart-btn btn-branding-color disabled btn-font-big btn-med"
-    //class="payment-button-container place-order-button anycart-btn btn-branding-color btn-font-big-bold btn-med"
-    //summary-row total 
-
-    await page.waitForSelector('.payment-button-container', {
-        timeout: 120000
-    })
-
+    // await page.waitForSelector('.payment-button-container', {
+    //     timeout: 120000
+    // })
     console.log('Routine Finished')
     await browser.close();
-
 }
